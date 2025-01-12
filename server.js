@@ -1,33 +1,46 @@
 const http = require('http');
-const fs= require('fs');
+const fs = require('fs');
 
-const server = http.createServer((req,res) => {
-   console.log(req.url,req.method);
+const server = http.createServer((req, res) => {
+    console.log(req.url, req.method);
 
-   let path = './views/';
-   switch(req.url){
-    case '/' :
-        path += 'index.html'; break;
-    case '/about' :
-        path += 'about.html'; break;
-    default :
-      path += '404.html'; break;
-   }
-   //setheader content type
-   res.setHeader('content-type', 'text/html');
-  
-   // send html file 
-   fs.readFile(path , (err, data) => {
-        if(err){
-            console.log(err);
+    let path = './views/';
+    let statusCode = 200; // Initialize statusCode
+
+    switch (req.url) {
+        case '/':
+            path += 'index.html';
+            statusCode = 200;
+            break;
+        case '/about':
+            path += 'about.html';
+            statusCode = 200;
+            break;  
+        case '/about-me':
+            // redirect
+            res.statusCode = 301;
+            res.setHeader('Location', '/about');
             res.end()
-        }
-        else {
-           // res.write(data);
+            break;
+        default:
+            path += '404.html';
+            statusCode = 404;
+            break;
+    }
+
+    // Set header content type
+    res.setHeader('Content-Type', 'text/html');
+    res.statusCode = statusCode; // Set the status code
+
+    // Send HTML file
+    fs.readFile(path, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.end();
+        } else {
             res.end(data);
         }
-   })
-   
+    });
 });
 
 server.listen(3000, 'localhost', () => {
